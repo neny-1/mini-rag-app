@@ -9,7 +9,9 @@ from controllers import DataController,ProjectController,ProcessController
 from .schemes.ProcessRequest import ProcessRequest
 from models.ProjectModel import ProjectModel
 from models.ChunkModel import ChunkModel
-from models.db_schemes import DataChunks
+from models.AssetModel import AssetModel
+from models.db_schemes import DataChunks, Asset
+from models.enums.AssetTypeEnum import AssetTypeEnum
 
 
 
@@ -28,7 +30,7 @@ project_controller = ProjectController()
 # upload_data will tack file_id with type string,uploaded file
 async def upload_data(request:Request,project_id:str,file:UploadFile,app_settings:Settings =Depends(get_settings)):
     
-    project_model= ProjectModel(db_client=request.app.db_client)
+    project_model= await ProjectModel.create_instance(db_client=request.app.db_client)
 
     project= await project_model.get_project_or_create_one(project_id=project_id)
 
@@ -44,7 +46,7 @@ async def upload_data(request:Request,project_id:str,file:UploadFile,app_setting
     
     # use ProjectController to get the path and name of file that you want to store it in which directory
     #project_dir_path = project_controller().get_project_path(project_id=file_id)
-    file_path,generated_file_name = data_controller.generate_unique_filename(
+    file_path,file_id = data_controller.generate_unique_filename(
         orig_file_name=file.filename,
         project_id=project_id
     )
@@ -67,21 +69,33 @@ async def upload_data(request:Request,project_id:str,file:UploadFile,app_setting
                 }
         )
 
-    # FILL_Success_upload
+    # store the assets into the database
+    asset_model = await AssetModel.create_instance(
+        db_client=request.app.db_client
+    )
+
+    asset_resource = Asset(
+        asset_project_id=project.id,
+        asset_type=AssetTypeEnum.FILE.value,
+        asset_name=file_id,
+        asset_size=os.path.getsize(file_path)
+    )
+
+    asset_record = await asset_model.create_asset(asset=asset_resource)
+
     return JSONResponse(
-                content={
-                    "signal": ResponseSignal.FILL_Success_upload.value,
-                    "unique file name":generated_file_name,
-                    "Projecct":str(project._id)
-                }
-            )
+            content={
+                "signal": ResponseSignal.FILL_Success_upload.value,
+                "file_id": str(asset_record.id),
+            }
+        )
 
 # new endpoint
 @data_router.post("/process/{project_id}")
 async def process_endpoint(request:Request,project_id:str,ProcessRequest:ProcessRequest):
 
     # to get project id 
-    chunk_model= ProjectModel(db_client=request.app.db_client)
+    chunk_model= await ProjectModel.create_instance(db_client=request.app.db_client)
     project= await chunk_model.get_project_or_create_one(project_id=project_id)
 
     file_id=ProcessRequest.file_id
@@ -120,7 +134,7 @@ async def process_endpoint(request:Request,project_id:str,ProcessRequest:Process
         for i,chunk in enumerate(file_chunks)
     ]
     # connect to database to delete or insert
-    chunk_model=ChunkModel(db_client=request.app.db_client)
+    chunk_model=await ChunkModel.create_instance(db_client=request.app.db_client)
 
     # delete the chunks if the user enter the same id so delete the old and insert new
 

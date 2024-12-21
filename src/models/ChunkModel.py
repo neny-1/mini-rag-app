@@ -11,6 +11,27 @@ class ChunkModel(BaseDataModel):
         super().__init__(db_client)
         self.collection=self.db_client[DataBaseEnum.COLLECTION_CHUNK_NAME.value]
 
+    # function to add __init__ =>not asynch and init_collection =>asynch must have await
+    @classmethod
+    async def create_instance(cls,db_client:object):  # __init__(self,db_client:object)
+        instance = cls(db_client)  # take an object from DataChunkModel and now it is have all values and functions of it
+        await instance.init_collection()
+        return instance
+
+    # create function for indexing 
+    async def init_collection(self):
+        all_collections = await self.db_client.list_collection_names()
+        if DataBaseEnum.COLLECTION_CHUNK_NAME.value not in all_collections:  # if there is an collection with this name in database
+            self.collection = self.db_client[DataBaseEnum.COLLECTION_CHUNK_NAME.value] # create one
+            indexes = DataChunks.get_indexes()
+            # store the values in database
+            for index in indexes:
+                await self.collection.create_index( # create in database and it takes three arg index,name,unique
+                    index["key"],
+                    name=index["name"],
+                    unique=index['unique']
+                )
+
     async def create_chunk(self,chunk:DataChunks):
         result = await self.collection.insert_one(chunk.dict(by_alias=True,exclude_unset=True)) # chunk.dict() whene insert data in data base convert it to diectionery
         chunk._id =result.inserted_id
