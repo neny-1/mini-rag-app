@@ -15,6 +15,21 @@ class Settings(BaseSettings):
     MONGODB_URL:str
     MONGODB_DATABASE:str
 
+    GENERATION_BACKEND:str
+    EMBEDDING_BACKEND:str
+
+    OPENAI_API_KEY:str=None
+    OPENAI_API_URL:str=None
+    COHERE_API_KEY:str=None
+
+    GENERATION_MODEL_ID:str=None
+    EMBEDDING_MODEL_ID:str=None
+    EMBEDDING_MODEL_SIZE:str=None
+
+    INPUT_DEFAULT_MAX_CHARACTERS:str=None
+    GENERATION_DEFAULT_OUTPUT_TOKENS:str=None
+    GENERATION_DEFAULT_TEMPERATURE:str=None
+
     class Config:
         env_file=".env"
 
