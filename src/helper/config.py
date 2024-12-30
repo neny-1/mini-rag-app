@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     GENERATION_DEFAULT_OUTPUT_TOKENS:str=None
     GENERATION_DEFAULT_TEMPERATURE:str=None
 
+    VECTOR_DB_BAKEND:str
+    VECTOR_DB_PATH:str
+    VECTOR_DB_DISTANCE_METHOD:str=None
     class Config:
         env_file=".env"
 
