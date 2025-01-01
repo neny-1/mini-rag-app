@@ -45,7 +45,7 @@ class ChunkModel(BaseDataModel):
     
     # range(from,to,step =>0,1000,100) =>10 iteraction from 0 to 1000 each time take 100 so 0=>100 ,100=>200,200=>300
     # انا بكون عايز اخد الداتا زي بالك كدا يعني عشان دي طريقة احسن للتعامل مع الداتا بيز
-    async def create_many_chunks(self,chunks:list,batch_size=100):
+    async def insert_many_chunks(self,chunks:list,batch_size=100):
 
         for i in range(0,len(chunks),batch_size):
             batch =chunks[i:i+batch_size] # batch[0] = chunks[0:100] ...
@@ -68,5 +68,17 @@ class ChunkModel(BaseDataModel):
         if result.deleted_count >0:
             return {f"deleted {result.deleted_count}"}
         return "there is no deleted cunk"
+    
+    # get all chunks for this project id =>use pagination
+    async def get_project_chunks(self,project_id:ObjectId,page_num:int=1,page_size:int=50):
+        records = await self.collection.find({
+            "chunk_project_id": project_id
+        }).skip((page_num-1)*page_size).limit(page_size).to_list(length=None)
+        
+        # to return the data in form of DataChunks object
+        return [
+            DataChunks(**chunk) 
+            for chunk in records
+            ]
 
     

@@ -37,7 +37,7 @@ class ProcessController(BaseController):
         return loader.load()
 
     # inside Loader().load().textsplitter() textsplitter means=>chunks there are two objects document,metadata
-    def process_file_content(self,file_contnet:list,file_id:str,chunk_size:int=100,chunk_overlap:int=20):
+    def process_file_content(self,file_content:list,file_id:str,chunk_size:int=100,chunk_overlap:int=20):
         
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=chunk_size,
@@ -48,12 +48,12 @@ class ProcessController(BaseController):
         #we have chunks now but there are two objects document,metadata in each chunk
         file_contnet_texts=[
             rec.page_content
-            for rec in file_contnet
+            for rec in file_content
         ]
 
         file_contnet_metadata=[
             rec.metadata
-            for rec in file_contnet
+            for rec in file_content
         ]
 
         # select each text with its metadata 
