@@ -8,7 +8,7 @@ An AI-powered application that leverages Retrieval-Augmented Generation (RAG) to
 - Scalable and modular design using the **MVC architecture**.
 - Powered by **Qdrant** for high-performance vector-based search.
 - Integrated with **Ollama** for enhanced AI capabilities.
-- Future Plans: Extend support for more file formats (e.g., Word documents, Excel files, etc.).
+- Future Plans: Extend support for more file formats (e.g.,Excel files, etc.).
 
 ## Technologies Used
 - **Backend:** FastAPI, Python
