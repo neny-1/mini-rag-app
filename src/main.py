@@ -4,6 +4,7 @@ from helper.config import get_settings
 from motor.motor_asyncio import AsyncIOMotorClient
 from stores.llm.LLMProviderFactory import LLMProviderFactory
 from stores.vectordb.VectorDBProviderFactory import VectorDBProviderFactory
+from stores.llm.templates.TemplateParser import TemplateParser
 
 app = FastAPI()
 
@@ -17,6 +18,7 @@ async def startup_db_client():
     llm_provider_factory= LLMProviderFactory(settings)
     vectordb_provider_factory =VectorDBProviderFactory(settings)
 
+
     # generation client
     app.generation_client= llm_provider_factory.create(provider=settings.GENERATION_BACKEND)
     app.generation_client.set_generation_model(model_id=settings.GENERATION_MODEL_ID)
@@ -29,10 +31,17 @@ async def startup_db_client():
     #vector db client
     app.vectordb_client= vectordb_provider_factory.create(provider=settings.VECTOR_DB_BACKEND)
     app.vectordb_client.connect()
+
+    # template parser
+    app.template_parser = TemplateParser(
+                language=settings.PRIMARY_LANG,
+                default_language=settings.DEFAULT_LANG)
+
 # when app shutdown =>close connection
 async def shutdown_db_client():
     app.mongo_conn.close()
     app.vectordb_client.disconnect()
+
 
 #app.router.lifespan.on_startup.append(startup_db_client)
 #app.router.lifespan.on_shutdown.append(shutdown_db_client)

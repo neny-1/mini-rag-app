@@ -15,3 +15,5 @@ class ResponseSignal(Enum):
     GET_COLLECTION_INFO_SUCCESS="Get collection info success"
     VECTOR_SEARCH_FAILED="Search failed"
     VECTOR_SEARCH_SUCCESS="Search success"
+    ANSWER_GENERATION_FAILED="Answer generation failed"
+    ANSWER_GENERATION_SUCCESS="Answer generation success"
